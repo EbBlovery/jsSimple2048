@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        td {
+            border: 1px solid black;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td id='0_0'></td>
+            <td id='0_1'></td>
+            <td id='0_2'></td>
+            <td id='0_3'></td>
+        </tr>
+        <tr>
+            <td id='1_0'></td>
+            <td id='1_1'></td>
+            <td id='1_2'></td>
+            <td id='1_3'></td>
+        </tr>
+        <tr>
+            <td id='2_0'></td>
+            <td id='2_1'></td>
+            <td id='2_2'></td>
+            <td id='2_3'></td>
+        </tr>
+        <tr>
+            <td id='3_0'></td>
+            <td id='3_1'></td>
+            <td id='3_2'></td>
+            <td id='3_3'></td>
+        </tr>
+    </table>
+
+    <script>
+        //定义一个棋盘
+        var map;
+        //将棋盘渲染到界面
+        function render() {
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 4; j++) {
+                    document.getElementById(i + "_" + j).innerText = map[i][j] == 0 ? "" : map[i][j];
+                }
+            }
+        }
+
+        //判断游戏是否结束
+        function isGameOver() {
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 4; j++) {
+                    if (map[i][j] == 0) {
+                        return false;
+                    }
+                    if ((i >= 1 && map[i][j] == map[i - 1][j]) ||
+                        (j >= 1 && map[i][j] == map[i][j - 1])) //还可以移动
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function getNewLocaltion() {
+            while (true) {
+                var i = parseInt(Math.random() * 4);
+                var j = parseInt(Math.random() * 4);
+                if (map[i][j] == 0) {
+                    return [i, j];
+                }
+            }
+        }
+        //随机添加新项到棋盘
+        function random() {
+            var value = Math.random() > 0.5 ? 2 : 4;
+            var localtion = getNewLocaltion();
+            map[localtion[0]][localtion[1]] = value;
+            render();
+        }
+        //向下移动
+        function moveDown() {
+            var result = false;
+            for (var j = 0; j < 4; j++) {
+                var moveCount = 0;
+                for (var i = 3; i >= 0; i--) {
+                    if (map[i][j] == 0) //是空值的时候自然要移动
+                    {
+                        moveCount++;
+                    } else //不是空值的时候看看会不会合并，合并也要加
+                    {
+                        if (move(i, j, i + moveCount, j, false)) {
+                            result = true;
+                        }
+                        for (var k = i - 1; k >= 0; k--) {
+                            if (map[k][j] != 0) {
+                                if (map[i + moveCount][j] != 0 && map[k][j] != 0 &&
+                                    map[i + moveCount][j] == map[k][j]) {
+                                    if (move(k, j, i + moveCount, j, true)) {
+                                        result = true;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (result) {
+                random();
+            }
+        }
+        //向上移动
+        function moveUp() {
+            var result = false;
+            for (var j = 0; j < 4; j++) {
+                var moveCount = 0;
+                for (var i = 0; i < 4; i++) {
+                    if (map[i][j] == 0) //是空值的时候自然要移动
+                    {
+                        moveCount++;
+                    } else //不是空值的时候看看会不会合并，合并也要加
+                    {
+                        if (move(i, j, i - moveCount, j, false)) {
+                            result = true;
+                        }
+                        for (var k = i + 1; k < 4; k++) {
+                            if (map[k][j] != 0) {
+                                if (map[i - moveCount][j] != 0 && map[k][j] != 0 &&
+                                    map[i - moveCount][j] == map[k][j]) {
+                                    if (move(k, j, i - moveCount, j, true)) {
+                                        result = true;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (result) {
+                random();
+            }
+        }
+        //向左移动
+        function moveLeft() {
+            var result = false;
+            for (var i = 0; i < 4; i++) {
+                var moveCount = 0;
+                for (var j = 0; j < 4; j++) {
+                    if (map[i][j] == 0) //是空值的时候自然要移动
+                    {
+                        moveCount++;
+                    } else //不是空值的时候看看会不会合并，合并也要加
+                    {
+                        if (move(i, j, i, j - moveCount, false)) {
+                            result = true;
+                        }
+                        for (var k = j + 1; k < 4; k++) {
+                            if (map[i][k] != 0) {
+                                if (map[i][j - moveCount] != 0 && map[i][k] != 0 &&
+                                    map[i][j - moveCount] == map[i][k]) {
+                                    if (move(i, k, i, j - moveCount, true)) {
+                                        result = true;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (result) {
+                random();
+            }
+        }
+        //向右移动
+        function moveRight() {
+            var result = false;
+            for (var i = 0; i < 4; i++) {
+                var moveCount = 0;
+                for (var j = 3; j >= 0; j--) {
+                    if (map[i][j] == 0) //是空值的时候自然要移动
+                    {
+                        moveCount++;
+                    } else //不是空值的时候看看会不会合并，合并也要加
+                    {
+                        if (move(i, j, i, j + moveCount, false)) {
+                            result = true;
+                        }
+                        for (var k = j - 1; k >= 0; k--) {
+                            if (map[i][k] != 0) {
+                                if (map[i][j + moveCount] != 0 && map[i][k] != 0 &&
+                                    map[i][j + moveCount] == map[i][k]) {
+                                    if (move(i, k, i, j + moveCount, true)) {
+                                        result = true;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (result) {
+                random();
+            }
+        }
+
+        //移动
+        function move(i1, j1, i2, j2, isAdd) {
+            if (i1 == i2 && j1 == j2) {
+                return false;
+            }
+            if (isAdd) {
+                map[i2][j2] = map[i1][j1] * 2;
+            } else {
+                map[i2][j2] = map[i1][j1];
+            }
+            map[i1][j1] = 0;
+            return true;
+        }
+
+        //开始游戏
+        function startGame() {
+            //初始化棋盘
+            map = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
+            //开始的时候会随机出现两个数字
+            random();
+            random();
+
+            //监听键盘事件
+            document.onkeydown = function(e) {
+                if (isGameOver()) {
+                    alert("游戏结束");
+                    startGame();
+                    return;
+                }
+
+                switch (e.keyCode) {
+                    case 40:
+                        moveDown()
+                        break;
+                    case 38:
+                        moveUp()
+                        break;
+                    case 37:
+                        moveLeft()
+                        break;
+                    case 39:
+                        moveRight()
+                        break;
+                }
+            };
+        }
+
+        startGame();
+    </script>
+</body>
+
+</html>
